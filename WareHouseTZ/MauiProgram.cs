@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using WareHouseTZ.Date;
+using WareHouseTZ.Service;
 
 namespace WareHouseTZ
 {
@@ -15,8 +17,12 @@ namespace WareHouseTZ
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+
+            builder.Services.AddSingleton<DBApplication>();
+            builder.Services.AddScoped<IDBService,DBService>();
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

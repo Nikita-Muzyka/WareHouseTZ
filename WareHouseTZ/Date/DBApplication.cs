@@ -10,13 +10,14 @@ namespace WareHouseTZ.Date
 {
     public class DBApplication : DbContext
     {
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Coming> Comings { get; set; }
-        public DbSet<Consumption> Consumptions { get; set; }
+        public DbSet<Product> Product { get; set; }
+        public DbSet<Coming> Coming { get; set; }
+        public DbSet<Consumption> Consumption { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string connectionString = "Server=localhost\\SQLEXPRESS;Database=WarehouseDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;";
+            string connectionString = "Server=MYZUKA\\SQLEXPRESS;Database=WareHouseTZ;Trusted_Connection=true;TrustServerCertificate=true;";
+            optionsBuilder.UseSqlServer(connectionString);
         }
     }
 }
