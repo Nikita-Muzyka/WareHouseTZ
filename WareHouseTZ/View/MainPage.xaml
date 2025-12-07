@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WareHouseTZ.MainPage">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Верхняя панель с поиском и кнопкой добавления -->
+        <VerticalStackLayout Grid.Row="0" Spacing="10" Padding="20,10,20,0">
+
+            <!-- SearchBar для поиска -->
+            <SearchBar Placeholder="Поиск товаров по названию..."
+                       Text="{Binding SearchText}"
+                       SearchCommand="{Binding SearchCommand}"
+                       CancelButtonColor="Gray"
+                       HorizontalOptions="Fill">
+            </SearchBar>
+
+            <!-- Кнопка добавления -->
+            <Button Text="➕ Добавить товар" 
+                    Command="{Binding AddProductCommand}"
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    HeightRequest="50"
+                    CornerRadius="8"/>
+        </VerticalStackLayout>
+
+        <!-- Список товаров -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding FilteredProducts}"
+                        SelectionMode="None"
+                        Margin="20,0">
+
+            <!-- Сообщение при пустом списке -->
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" 
+                                     VerticalOptions="Center"
+                                     Spacing="20"
+                                     Padding="40">
+
+                    <Label Text="📦" 
+                           FontSize="50"
+                           HorizontalOptions="Center"/>
+
+                    <Label Text="Товаров не найдено" 
+                           FontSize="16"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"/>
+
+                    <Button Text="Добавить товар"
+                            Command="{Binding AddProductCommand}"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="45"
+                            WidthRequest="200"
+                            HorizontalOptions="Fill"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <!-- Шаблон каждого товара -->
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+
+                    <Border Stroke="#E0E0E0"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8"
+                            Margin="0,0,0,10"
+                            Padding="15"
+                            BackgroundColor="White">
+
+                        <Grid ColumnDefinitions="*,Auto"
+                              RowDefinitions="Auto,Auto,Auto">
+
+                            <!-- Название товара -->
+                            <Label Grid.Row="0" 
+                                   Grid.Column="0"
+                                   Text="{Binding Name}" 
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#212121"/>
+
+                            <!-- Описание товара (если есть) -->
+                            <Label Grid.Row="1" 
+                                   Grid.Column="0"
+                                   Text="{Binding Description}" 
+                                   FontSize="14"
+                                   TextColor="Gray"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="2"/>
+
+                            <!-- Единица измерени -->
+                            <HorizontalStackLayout Grid.Row="2" 
+                                                   Grid.Column="0"
+                                                   Spacing="15"
+                                                   Margin="0,5,0,0">
+
+                                <Border BackgroundColor="#E3F2FD"
+                                        Stroke="Transparent"
+                                        StrokeShape="RoundRectangle 5"
+                                        Padding="8,4">
+                                    <Label Text="{Binding Unit}" 
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="#2196F3"/>
+                                </Border>
+
+                            </HorizontalStackLayout>
+
+                            <!-- Кнопки Изменить и Удалить -->
+                            <HorizontalStackLayout Grid.RowSpan="3" 
+                                                   Grid.Column="1"
+                                                   Spacing="10"
+                                                   VerticalOptions="Center">
+
+                                <!-- Кнопка Изменить -->
+                                <Button Text="✏️" 
+                                        FontSize="14"
+                                        BackgroundColor="#4CAF50"
+                                        TextColor="White"
+                                        WidthRequest="45"
+                                        HeightRequest="45"
+                                        CornerRadius="8"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                         Path=BindingContext.EditProductCommand}"
+                                        CommandParameter="{Binding .}"/>
+
+                                <!-- Кнопка Удалить -->
+                                <Button Text="🗑️" 
+                                        FontSize="14"
+                                        BackgroundColor="#F44336"
+                                        TextColor="White"
+                                        WidthRequest="45"
+                                        HeightRequest="45"
+                                        CornerRadius="8"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                         Path=BindingContext.DeleteProductCommand}"
+                                        CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

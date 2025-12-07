@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WareHouseTZ.View.CreateProductView"
+             Title="CreateProductView">
+
+    <VerticalStackLayout Padding="20" Spacing="15">
+
+        <!-- Название -->
+        <Label Text="Название товара *"/>
+        <Entry Placeholder="Введите название"
+               Text="{Binding Name}"
+               HeightRequest="45"/>
+        <Label Text="{Binding NameError}" TextColor="Red"/>
+
+        <!-- Описание -->
+        <Label Text="Описание"/>
+        <Editor Placeholder="Описание (необязательно)"
+                Text="{Binding Description}"
+                AutoSize="TextChanges"
+                MinimumHeightRequest="60"/>
+
+        <!-- Единица измерения - ПРАВИЛЬНЫЙ вариант -->
+        <Label Text="Единица измерения"/>
+        <Picker Title="Выберите единицу"
+                ItemsSource="{Binding Units}"
+                SelectedItem="{Binding SelectedUnit}"
+                HeightRequest="60"/>
+        <Editor Placeholder="Описание (необязательно)"
+        Text="{Binding Count}"
+        AutoSize="TextChanges"
+        MinimumHeightRequest="60"/>
+
+        <Label Text="{Binding CountError}" TextColor="Red"/>
+
+        <!-- Кнопки -->
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+
+            <Button Grid.Column="1"
+                    Text="Сохранить"
+                    Command="{Binding CreateProductCommand}"
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    HeightRequest="45"/>
+
+            <Label Text="{Binding Response}" TextColor="Red"/>
+        </Grid>
+
+    </VerticalStackLayout>
+</ContentPage>
