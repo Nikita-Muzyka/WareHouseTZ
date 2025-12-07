@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using WareHouseTZ.Date;
 using WareHouseTZ.Service;
+using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ
 {
@@ -20,6 +21,7 @@ namespace WareHouseTZ
 
             builder.Services.AddSingleton<DBApplication>();
             builder.Services.AddScoped<IDBService,DBService>();
+            builder.Services.AddScoped<IDisplayService,DisplayService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

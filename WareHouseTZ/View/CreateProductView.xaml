@@ -43,7 +43,6 @@
                     TextColor="White"
                     HeightRequest="45"/>
 
-            <Label Text="{Binding Response}" TextColor="Red"/>
         </Grid>
 
     </VerticalStackLayout>

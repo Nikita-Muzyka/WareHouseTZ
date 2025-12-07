@@ -8,17 +8,20 @@ using System.Text;
 using System.Threading.Tasks;
 using WareHouseTZ.Modal;
 using WareHouseTZ.Service;
+using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
     public partial class CreateProductViewModal : ObservableObject
     {
         private readonly IDBService _dbService;
+        private readonly IDisplayService _displayService;
         private ProductValidation _validation;
         private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-        public CreateProductViewModal(IDBService dBService)
+        public CreateProductViewModal(IDBService dBService,IDisplayService display)
         {
             _dbService = dBService;
+            _displayService = display;
             _validation = new ProductValidation(dBService);
             _validation.ErrorsChanged += (s,e) => EventInvoke(e);
         }
@@ -35,8 +38,6 @@ namespace WareHouseTZ.ViewModal
         [ObservableProperty]
         public string count;
 
-        [ObservableProperty]
-        public string response;
 
         [ObservableProperty]
         public List<string> units = new List<string>
@@ -60,7 +61,7 @@ namespace WareHouseTZ.ViewModal
                 };
 
                 var response = await _dbService.AddProductDBAsync(product);
-                Response = response.Message;
+                if (response.Success == true) _displayService.ShowMessage(response.Message);
             }
         }
         public void EventInvoke(DataErrorsChangedEventArgs errors)

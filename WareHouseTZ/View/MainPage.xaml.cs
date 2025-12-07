@@ -1,4 +1,5 @@
 ﻿using WareHouseTZ.Service;
+using WareHouseTZ.Service.Display;
 using WareHouseTZ.ViewModal;
 
 namespace WareHouseTZ
@@ -6,10 +7,10 @@ namespace WareHouseTZ
     public partial class MainPage : ContentPage
     {
         MainPageViewModal mainVM;
-        public MainPage(IDBService dBService)
+        public MainPage(IDBService dBService,IDisplayService display)
         {
             InitializeComponent();
-            mainVM = new MainPageViewModal(dBService);
+            mainVM = new MainPageViewModal(dBService,display);
             BindingContext = mainVM;
         }
 

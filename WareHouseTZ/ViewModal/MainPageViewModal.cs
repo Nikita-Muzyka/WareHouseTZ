@@ -10,20 +10,24 @@ using WareHouseTZ.Modal;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Identity.Client;
 using WareHouseTZ.View;
+using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
     public partial class MainPageViewModal : ObservableObject
     {
         private readonly IDBService _dBService;
+        private readonly IDisplayService _display;
+
         public ObservableCollection<Product> Products { get;set; }
         public ObservableCollection<Product> FilteredProducts { get;set; }
 
         [ObservableProperty]
         public string searchText = string.Empty;
-        public MainPageViewModal(IDBService dBService)
+        public MainPageViewModal(IDBService dBService,IDisplayService display)
         {
             _dBService = dBService;
+            _display = display;
             LoadProducts();
         }
 
@@ -65,12 +69,14 @@ namespace WareHouseTZ.ViewModal
         [RelayCommand]
         public async void DeleteProduct(Product product)
         {
-
+            var response = await _dBService.DeleteProductAsync(product.Id);
+            _display.ShowMessage(response.Message);
+            if (response.Success == true) LoadProducts();
         }
         [RelayCommand]
         public async void AddProduct()
         {
-            await Shell.Current.Navigation.PushAsync(new CreateProductView(_dBService));
+            await Shell.Current.Navigation.PushAsync(new CreateProductView(_dBService,_display));
         }
     }
 }
