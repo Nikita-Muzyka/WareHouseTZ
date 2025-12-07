@@ -108,5 +108,19 @@ namespace WareHouseTZ.Service
                 return new ErrorsResponse(ex.Message, "Ошибка при поиске продукта");
             }
         }
+        public async Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName)
+        {
+            try
+            {
+                var existingProduct = await dbApplication.Product.FirstOrDefaultAsync(c => c.Name == Name);
+                if (existingProduct is null) return new DBResponseMessage("Имя свободно", true);
+                else if (existingProduct.Name == OldName) return new DBResponseMessage("Имена совпадают", true);
+                else return new ErrorsResponse("Имя продукта уже есть в базе");
+            }
+            catch (Exception ex)
+            {
+                return new ErrorsResponse(ex.Message, "Ошибка при поиске продукта");
+            }
+        }
     }
 }

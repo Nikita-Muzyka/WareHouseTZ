@@ -57,14 +57,16 @@ namespace WareHouseTZ.ViewModal
             }
 
 
-            FilteredProducts = new ObservableCollection<Product>(Products);
+            FilteredProducts = Products != null
+             ? new ObservableCollection<Product>(Products)
+             : new ObservableCollection<Product>();
             OnPropertyChanged(nameof(FilteredProducts));
         }
 
         [RelayCommand]
         public async void EditProduct(Product product)
         {
-
+            await Shell.Current.Navigation.PushAsync(new EditProductView(_dBService, _display,product));
         }
         [RelayCommand]
         public async void DeleteProduct(Product product)

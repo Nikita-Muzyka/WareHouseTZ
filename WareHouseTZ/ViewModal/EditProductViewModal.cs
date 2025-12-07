@@ -10,21 +10,16 @@ using WareHouseTZ.Modal;
 using WareHouseTZ.Service;
 using WareHouseTZ.Service.Display;
 
+
 namespace WareHouseTZ.ViewModal
 {
-    public partial class CreateProductViewModal : ObservableObject
+    public partial class EditProductViewModal : ObservableObject
     {
         private readonly IDBService _dbService;
         private readonly IDisplayService _displayService;
+        public Product _product;
         private ProductValidation _validation;
         private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-        public CreateProductViewModal(IDBService dBService,IDisplayService display)
-        {
-            _dbService = dBService;
-            _displayService = display;
-            _validation = new ProductValidation(dBService);
-            _validation.ErrorsChanged += (s,e) => EventInvoke(e);
-        }
 
         public bool HasErrors => _validation.HasErrors;
         public string NameError => _validation.GetErrors("NameError") as String;
@@ -38,29 +33,46 @@ namespace WareHouseTZ.ViewModal
         [ObservableProperty]
         public string count;
 
-
         [ObservableProperty]
         public List<string> units = new List<string>
         {
             "шт", "кг", "г",
         };
+        public EditProductViewModal(IDBService dBService,IDisplayService display,Product product) 
+        {
+            _dbService = dBService;
+            _displayService = display;
+            _product = product;
+            _validation = new ProductValidation(dBService);
+            _validation.ErrorsChanged += (s, e) => EventInvoke(e);
+            LoadProduct();
+        }
+        void LoadProduct()
+        {
+            Name = _product.Name;
+            Description = _product.Description;
+
+            string text = _product.Unit.TrimEnd(new char[] { ' ','ш','т','к','г' });
+
+            Count = text;
+        }
 
         [RelayCommand]
-        public async void CreateProduct()
+        public async void EditProduct()
         {
-            _validation.ValidationAll(Name,Count);
-            if(HasErrors == false)
+            _validation.EditValidationAll(Name, Count,_product.Name);
+            if (HasErrors == false)
             {
                 string UnitLast = Count + " " + SelectedUnit;
-                var product = new Product
+                var updateProduct = new Product
                 {
+                    Id = _product.Id,
                     Name = Name,
                     Description = Description,
-                    Created_At = DateTime.Now,
                     Unit = UnitLast
                 };
 
-                var response = await _dbService.AddProductDBAsync(product);
+                var response = await _dbService.UpdateProductAsync(updateProduct);
                 if (response.Success == true) _displayService.ShowMessage(response.Message);
             }
         }
@@ -84,13 +96,12 @@ namespace WareHouseTZ.ViewModal
                 _tokenSource.Cancel();
                 _tokenSource = new CancellationTokenSource();
                 await Task.Delay(1000, _tokenSource.Token);
-                _validation.ValidationName(value);
+                _validation.EditValidationName(value,_product.Name);
             }
-            catch(TaskCanceledException ex)
+            catch (TaskCanceledException ex)
             {
 
             }
         }
-
     }
 }

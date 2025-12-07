@@ -27,12 +27,35 @@ namespace WareHouseTZ.Modal
         {
             _dbService = dBService;
         }
-        public async void ValidationAll(string Name,string Count)
+        public void ValidationAll(string Name,string Count)
         {
-            await ValidationNameAsync(Name);
+            ValidationName(Name);
             ValidationCount(Count);
         }
-        public async Task ValidationNameAsync(string Name)
+        public void EditValidationAll(string Name, string Count,string OldName)
+        {
+            EditValidationName(Name,OldName);
+            ValidationCount(Count);
+        }
+        public async void EditValidationName(string Name,string OldName)
+        {
+            ErrorsClear(propertyNameError);
+            if (string.IsNullOrWhiteSpace(Name) == false)
+            {
+                if (Name.Length < 50)
+                {
+                    var response = await _dbService.EditCheckNameProductAsync(Name,OldName);
+                    if (response.Success == true)
+                    {
+                        OnErrorsChanged(propertyNameError);
+                    }
+                    else ErrorsAdd(propertyNameError, response.Message);
+                }
+                else ErrorsAdd(propertyNameError, "Name должен сожержать не больше 50  знаков");
+            }
+            else ErrorsAdd(propertyNameError, "Поле обязательно к заполнению");
+        }
+        public async void ValidationName(string Name)
         {
             ErrorsClear(propertyNameError);
             if (string.IsNullOrWhiteSpace(Name) == false)

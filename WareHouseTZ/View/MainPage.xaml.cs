@@ -2,7 +2,7 @@
 using WareHouseTZ.Service.Display;
 using WareHouseTZ.ViewModal;
 
-namespace WareHouseTZ
+namespace WareHouseTZ.View
 {
     public partial class MainPage : ContentPage
     {
@@ -14,15 +14,15 @@ namespace WareHouseTZ
             BindingContext = mainVM;
         }
 
-        //protected override void OnAppearing()
-        //{
-        //    base.OnAppearing();
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
 
-        //    // Запускаем команду загрузки
-        //    if (BindingContext is MainPageViewModal viewModel)
-        //    {
-        //        viewModel.LoadProductsCommand.Execute(null);
-        //    }
-        //}
+            // Автоматическая подгрузка при каждом входе на страницу
+            if (BindingContext is MainPageViewModal viewModel)
+            {
+                viewModel.LoadProductsCommand.Execute(null);
+            }
+        }
     }
 }
