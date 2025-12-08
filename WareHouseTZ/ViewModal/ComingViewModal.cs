@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using WareHouseTZ.Modal;
 using WareHouseTZ.Service;
 using WareHouseTZ.Service.Display;
+using WareHouseTZ.Service.Response;
+using WareHouseTZ.View;
 
 namespace WareHouseTZ.ViewModal
 {
@@ -60,7 +62,7 @@ namespace WareHouseTZ.ViewModal
             query = query.Where(c => c.Date.Date >= SelectedDateFrom.Date &&
                                      c.Date.Date <= SelectedDateTo.Date);
 
-            // Фильтр по поиску
+
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 var searchLower = SearchText.ToLowerInvariant();
@@ -77,7 +79,13 @@ namespace WareHouseTZ.ViewModal
         [RelayCommand]
         public async void LoadComings()
         {
-           
+           var response = await _dBService.GetAllComingDBAsync();
+            if(response.Success == true)
+            {
+                var getall = response as GetAllComingResponse;
+                Comings = getall.Comings;
+                FilteredComings = Comings;
+            }
         }
 
         [RelayCommand]
@@ -89,13 +97,15 @@ namespace WareHouseTZ.ViewModal
         [RelayCommand]
         public async void DeleteComing(Coming coming)
         {
-           
+           var response = await _dBService.DeleteComingAsync(coming.Id);
+            _display.ShowMessage(response.Message);
+            LoadComings();
         }
 
         [RelayCommand]
         public async void AddComing()
         {
-
+            await Shell.Current.Navigation.PushAsync(new CreateComingView(_dBService, _display));
         }
        
     }

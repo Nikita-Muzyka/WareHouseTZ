@@ -8,6 +8,7 @@ using WareHouseTZ.Date;
 using WareHouseTZ.Modal;
 using WareHouseTZ.Service;
 using System.Collections.ObjectModel;
+using WareHouseTZ.Service.Response;
 
 namespace WareHouseTZ.Service
 {
@@ -95,6 +96,7 @@ namespace WareHouseTZ.Service
             }
         }
 
+
         public async Task<DBResponse> CheckNameProductAsync(string Name)
         {
             try
@@ -120,6 +122,53 @@ namespace WareHouseTZ.Service
             catch (Exception ex)
             {
                 return new ErrorsResponse(ex.Message, "Ошибка при поиске продукта");
+            }
+        }
+
+
+        //Coming
+
+        public async Task<DBResponse> AddComingDBAsync(Coming coming)
+        {
+            try
+            {
+                await dbApplication.Coming.AddAsync(coming);
+                await dbApplication.SaveChangesAsync();
+                return new DBResponseMessage("Продукт добавлен", true);
+            }
+            catch (Exception ex)
+            {
+                return new ErrorsResponse(ex.Message, "Ошибка при добавлении прихода");
+            }
+        }
+
+        public async Task<DBResponse> GetAllComingDBAsync()
+        {
+            try
+            {
+                var comings = await dbApplication.Coming.ToListAsync();
+                ObservableCollection<Coming> comingsCollection = new ObservableCollection<Coming>(comings);
+                if (comings is not null) return new GetAllComingResponse("Приходы найдены", true, comingsCollection);
+                else return new ErrorsResponse("Продуктов не найдено");
+            }
+            catch (Exception ex)
+            {
+                return new ErrorsResponse(ex.Message, "Ошибка при получении продукта");
+            }
+        }
+        public async Task<DBResponse> DeleteComingAsync(int coming_id)
+        {
+            try
+            {
+                var coming = await dbApplication.Coming.FindAsync(coming_id);
+                if (coming is null) return new ErrorsResponse("Приход не найден");
+                dbApplication.Coming.Remove(coming);
+                await dbApplication.SaveChangesAsync();
+                return new DBResponseMessage("Coming удален", true);
+            }
+            catch (Exception ex)
+            {
+                return new ErrorsResponse(ex.Message, "Ошибка при удалении продукта");
             }
         }
     }

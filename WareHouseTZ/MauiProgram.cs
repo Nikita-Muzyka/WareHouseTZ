@@ -19,7 +19,7 @@ namespace WareHouseTZ
                 });
 
 
-            builder.Services.AddSingleton<DBApplication>();
+            builder.Services.AddScoped<DBApplication>();
             builder.Services.AddScoped<IDBService,DBService>();
             builder.Services.AddScoped<IDisplayService,DisplayService>();
 

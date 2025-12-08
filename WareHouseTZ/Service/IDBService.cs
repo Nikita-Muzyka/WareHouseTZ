@@ -16,5 +16,11 @@ namespace WareHouseTZ.Service
         Task<DBResponse> UpdateProductAsync(Product product);
         Task<DBResponse> CheckNameProductAsync(string Name);
         Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName);
+
+        //Coming
+
+        Task<DBResponse> AddComingDBAsync(Coming coming);
+        Task<DBResponse> GetAllComingDBAsync();
+        Task<DBResponse> DeleteComingAsync(int coming_id);
     }
 }

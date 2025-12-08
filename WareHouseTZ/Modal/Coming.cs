@@ -14,7 +14,7 @@ namespace WareHouseTZ.Modal
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public DateTime Date { get; set; }
-        public int ProductId { get; set; }
+        public int Product_Id { get; set; }
         public string ProductName { get; set; }
         public decimal Quantity { get; set; }
         public decimal? Price { get; set; }
