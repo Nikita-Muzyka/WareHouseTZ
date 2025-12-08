@@ -1,33 +1,56 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="WareHouseTZ.View.MainPage">
+             x:Class="WareHouseTZ.View.ComingView"
+             Title="Приход товаров">
 
     <Grid RowDefinitions="Auto,*">
 
-        <!-- Верхняя панель с поиском и кнопкой добавления -->
+        <!-- Верхняя панель с фильтрами и кнопкой добавления -->
         <VerticalStackLayout Grid.Row="0" Spacing="10" Padding="20,10,20,0">
 
+            <!-- Фильтр по датам -->
+            <Grid ColumnDefinitions="*,Auto,*" 
+                  ColumnSpacing="10"
+                  VerticalOptions="Center">
+
+                <DatePicker Grid.Column="0"
+                            Date="{Binding SelectedDateFrom}"
+                            Format="dd.MM.yyyy"
+                            MaximumDate="{Binding SelectedDateTo}"
+                            VerticalOptions="Center"/>
+
+                <Label Grid.Column="1"
+                       Text="по"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"/>
+
+                <DatePicker Grid.Column="2"
+                            Date="{Binding SelectedDateTo}"
+                            Format="dd.MM.yyyy"
+                            MinimumDate="{Binding SelectedDateFrom}"
+                            VerticalOptions="Center"/>
+            </Grid>
+
             <!-- SearchBar для поиска -->
-            <SearchBar Placeholder="Поиск товаров по названию..."
+            <SearchBar Placeholder="Поиск по товару, поставщику, документу..."
                        Text="{Binding SearchText}"
-                       SearchCommand="{Binding SearchCommand}"
                        CancelButtonColor="Gray"
                        HorizontalOptions="Fill">
             </SearchBar>
 
             <!-- Кнопка добавления -->
-            <Button Text="➕ Добавить товар" 
-                    Command="{Binding AddProductCommand}"
+            <Button Text="➕ Добавить приход" 
+                    Command="{Binding AddComingCommand}"
                     BackgroundColor="#2196F3"
                     TextColor="White"
                     HeightRequest="50"
                     CornerRadius="8"/>
         </VerticalStackLayout>
 
-        <!-- Список товаров -->
+        <!-- Список приходов -->
         <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding FilteredProducts}"
+                        ItemsSource="{Binding FilteredComings}"
                         SelectionMode="None"
                         Margin="20,0">
 
@@ -42,13 +65,13 @@
                            FontSize="50"
                            HorizontalOptions="Center"/>
 
-                    <Label Text="Товаров не найдено" 
+                    <Label Text="Приходов не найдено" 
                            FontSize="16"
                            TextColor="Gray"
                            HorizontalOptions="Center"/>
 
-                    <Button Text="Добавить товар"
-                            Command="{Binding AddProductCommand}"
+                    <Button Text="Добавить приход"
+                            Command="{Binding AddComingCommand}"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             CornerRadius="8"
@@ -58,7 +81,7 @@
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
 
-            <!-- Шаблон каждого товара -->
+            <!-- Шаблон каждого прихода -->
             <CollectionView.ItemTemplate>
                 <DataTemplate>
 
@@ -70,36 +93,54 @@
                             BackgroundColor="White">
 
                         <Grid ColumnDefinitions="*,Auto"
-                              RowDefinitions="Auto,Auto,Auto">
+                              RowDefinitions="Auto,Auto,Auto,Auto">
 
-                            <!-- Название товара -->
+                            <!-- Дата и товар -->
                             <Label Grid.Row="0" 
                                    Grid.Column="0"
-                                   Text="{Binding Name}" 
-                                   FontSize="16"
-                                   FontAttributes="Bold"
-                                   TextColor="#212121"/>
+                                   Text="{Binding Date, StringFormat='{0:dd.MM.yyyy HH:mm}'}" 
+                                   FontSize="14"
+                                   TextColor="Gray"/>
 
-                            <!-- Описание товара (если есть) -->
                             <Label Grid.Row="1" 
                                    Grid.Column="0"
-                                   Text="{Binding Description}" 
-                                   FontSize="14"
-                                   TextColor="Gray"
-                                   LineBreakMode="TailTruncation"
-                                   MaxLines="2"/>
+                                   Text="{Binding ProductName}" 
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#212121"
+                                   Margin="0,5,0,0"/>
 
-                            <!-- Единица измерени -->
+                            <!-- Количество и цена -->
                             <HorizontalStackLayout Grid.Row="2" 
                                                    Grid.Column="0"
                                                    Spacing="15"
                                                    Margin="0,5,0,0">
 
+                                <Border BackgroundColor="#E8F5E9"
+                                        Stroke="Transparent"
+                                        StrokeShape="RoundRectangle 5"
+                                        Padding="8,4">
+                                    <Label Text="{Binding Quantity, StringFormat='{0} шт.'}" 
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="#4CAF50"/>
+                                </Border>
+
+                                <Border BackgroundColor="#FFF3E0"
+                                        Stroke="Transparent"
+                                        StrokeShape="RoundRectangle 5"
+                                        Padding="8,4">
+                                    <Label Text="{Binding Price, StringFormat='{0:C} за шт.'}" 
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="#FF9800"/>
+                                </Border>
+
                                 <Border BackgroundColor="#E3F2FD"
                                         Stroke="Transparent"
                                         StrokeShape="RoundRectangle 5"
                                         Padding="8,4">
-                                    <Label Text="{Binding Unit}" 
+                                    <Label Text="{Binding Total, StringFormat='Итого: {0:C}'}" 
                                            FontSize="12"
                                            FontAttributes="Bold"
                                            TextColor="#2196F3"/>
@@ -107,8 +148,30 @@
 
                             </HorizontalStackLayout>
 
+                            <!-- Поставщик и документ -->
+                            <HorizontalStackLayout Grid.Row="3" 
+                                                   Grid.Column="0"
+                                                   Spacing="10"
+                                                   Margin="0,5,0,0">
+
+                                <Label Text="{Binding Supplier}" 
+                                       FontSize="12"
+                                       TextColor="Gray"
+                                       LineBreakMode="TailTruncation"/>
+
+                                <Label Text="•" 
+                                       FontSize="12"
+                                       TextColor="Gray"/>
+
+                                <Label Text="{Binding Document}" 
+                                       FontSize="12"
+                                       TextColor="Gray"
+                                       FontAttributes="Italic"/>
+
+                            </HorizontalStackLayout>
+
                             <!-- Кнопки Изменить и Удалить -->
-                            <HorizontalStackLayout Grid.RowSpan="3" 
+                            <HorizontalStackLayout Grid.RowSpan="4" 
                                                    Grid.Column="1"
                                                    Spacing="10"
                                                    VerticalOptions="Center">
@@ -122,7 +185,7 @@
                                         HeightRequest="45"
                                         CornerRadius="8"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                         Path=BindingContext.EditProductCommand}"
+                                                         Path=BindingContext.EditComingCommand}"
                                         CommandParameter="{Binding .}"/>
 
                                 <!-- Кнопка Удалить -->
@@ -134,7 +197,7 @@
                                         HeightRequest="45"
                                         CornerRadius="8"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                         Path=BindingContext.DeleteProductCommand}"
+                                                         Path=BindingContext.DeleteComingCommand}"
                                         CommandParameter="{Binding .}"/>
                             </HorizontalStackLayout>
                         </Grid>

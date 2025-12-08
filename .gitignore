@@ -98,6 +98,20 @@ StyleCopReport.xml
 *.svclog
 *.scc
 
+# Файлы SQL Server
+*.mdf
+*.ldf
+*.ndf
+*.bak
+*.trn
+*.log
+
+# Файлы SSMS
+*.sqlplan
+*.dgml
+*.ssmssln
+*.ssmssqlproj.user
+
 # Chutzpah Test files
 _Chutzpah*
 

@@ -3,12 +3,21 @@
     x:Class="WareHouseTZ.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:WareHouseTZ"
+    xmlns:local="clr-namespace:WareHouseTZ.View"
     Title="WareHouseTZ">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <Tab Title="Товар">
+            <ShellContent
+     ContentTemplate="{DataTemplate local:MainPage}"
+     Route="MainPage" />
 
+        </Tab>
+        <Tab Title="Приход">
+            <ShellContent
+ContentTemplate="{DataTemplate local:ComingView}"
+Route="ComingView" />
+
+        </Tab>
+    </TabBar>
 </Shell>
