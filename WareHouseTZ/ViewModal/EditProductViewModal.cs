@@ -14,10 +14,8 @@ using WareHouseTZ.Service.Display;
 namespace WareHouseTZ.ViewModal
 {
     [QueryProperty(nameof(ProductParm),"ProductParm")]
-    public partial class EditProductViewModal : ObservableObject
+    public partial class EditProductViewModal : BaseViewModel
     {
-        private readonly IDBService _dbService;
-        private readonly IDisplayService _displayService;
         private ProductValidation _validation;
         private CancellationTokenSource _cts;
 
@@ -40,10 +38,8 @@ namespace WareHouseTZ.ViewModal
         {
             "шт", "кг", "г",
         };
-        public EditProductViewModal(IDBService dBService,IDisplayService display) 
+        public EditProductViewModal(IDBService dBService, IDisplayService display) : base(dBService, display)
         {
-            _dbService = dBService;
-            _displayService = display;
             _validation = new ProductValidation(dBService);
             _validation.ErrorsChanged += (s, e) => EventInvoke(e);
             _cts = new CancellationTokenSource();
@@ -74,8 +70,8 @@ namespace WareHouseTZ.ViewModal
                     Description = Description,
                     Unit = UnitLast
                 };
-                var response = await _dbService.UpdateProductAsync(updateProduct,_cts.Token);
-                if (response.Success == true) _displayService.ShowMessage(response.Message);
+                var response = await _dBService.UpdateProductAsync(updateProduct,_cts.Token);
+                if (response.Success == true) _display.ShowMessage(response.Message);
             }
         }
         public void EventInvoke(DataErrorsChangedEventArgs errors)

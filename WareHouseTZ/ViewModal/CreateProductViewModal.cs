@@ -13,16 +13,12 @@ using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class CreateProductViewModal : ObservableObject
+    public partial class CreateProductViewModal : BaseViewModel
     {
-        private readonly IDBService _dbService;
-        private readonly IDisplayService _displayService;
         private ProductValidation _validation;
         private CancellationTokenSource _cts;
-        public CreateProductViewModal(IDBService dBService,IDisplayService display)
-        {
-            _dbService = dBService;
-            _displayService = display;
+        public CreateProductViewModal(IDBService dBService, IDisplayService display) : base(dBService, display)
+        {   
             _validation = new ProductValidation(dBService);
             _validation.ErrorsChanged += (s,e) => EventInvoke(e);
             _cts = new CancellationTokenSource();
@@ -65,8 +61,8 @@ namespace WareHouseTZ.ViewModal
                     };
 
                     _cts.Token.ThrowIfCancellationRequested();
-                    var response = await _dbService.AddProductDBAsync(product, _cts.Token);
-                    if (response.Success == true) _displayService.ShowMessage(response.Message);
+                    var response = await _dBService.AddProductDBAsync(product, _cts.Token);
+                    if (response.Success == true) _display.ShowMessage(response.Message);
                 }
             }
             catch (OperationCanceledException) { }

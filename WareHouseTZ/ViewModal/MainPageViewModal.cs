@@ -14,10 +14,8 @@ using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class MainPageViewModal : ObservableObject
+    public partial class MainPageViewModal : BaseViewModel
     {
-        private readonly IDBService _dBService;
-        private readonly IDisplayService _display;
         private CancellationTokenSource _cts;
 
         public ObservableCollection<Product> Products { get;set; }
@@ -25,10 +23,8 @@ namespace WareHouseTZ.ViewModal
 
         [ObservableProperty]
         public string searchText = string.Empty;
-        public MainPageViewModal(IDBService dBService,IDisplayService display)
-        {
-            _dBService = dBService;
-            _display = display;
+        public MainPageViewModal(IDBService dBService, IDisplayService display) : base(dBService, display)
+        { 
             _cts = new CancellationTokenSource();
         }
 

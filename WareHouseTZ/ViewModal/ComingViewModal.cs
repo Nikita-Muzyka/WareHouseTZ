@@ -9,11 +9,9 @@ using WareHouseTZ.View;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class ComingViewModel : ObservableObject
+    public partial class ComingViewModel : BaseViewModel
     {
-        private readonly IDBService _dBService;
-        private readonly IDisplayService _display;
-
+      
         public ObservableCollection<Coming> Comings { get; set; }
         public ObservableCollection<Coming> FilteredComings { get; set; }
 
@@ -26,15 +24,10 @@ namespace WareHouseTZ.ViewModal
         [ObservableProperty]
         private DateTime selectedDateTo = DateTime.Now;
 
-        public ComingViewModel(IDBService dBService, IDisplayService display)
+        public ComingViewModel(IDBService dBService, IDisplayService display) : base(dBService, display)
         {
-            _dBService = dBService;
-            _display = display;
-
             Comings = new ObservableCollection<Coming>();
             FilteredComings = new ObservableCollection<Coming>();
-
-            LoadComings();
         }
 
         partial void OnSearchTextChanged(string value)
