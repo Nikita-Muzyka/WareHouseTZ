@@ -72,9 +72,9 @@ namespace WareHouseTZ.ViewModal
         }
 
         [RelayCommand]
-        public async Task EditProduct(Product product)
+        public async Task EditProduct(Product ProductParm)
         {
-            await Shell.Current.GoToAsync(nameof(CreateProductView));
+            await Shell.Current.GoToAsync(nameof(EditProductView), new Dictionary<string, object> { ["ProductParm"] = ProductParm });
         }
         [RelayCommand]
         public async Task DeleteProduct(Product product)

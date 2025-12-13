@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -49,13 +50,9 @@ namespace WareHouseTZ.ViewModal
         [RelayCommand]
         public async Task CreateProduct()
         {
-            await CreateAsync(_cts.Token);
-        }
-        private async Task CreateAsync(CancellationToken token)
-        {
             try
             {
-                _validation.ValidationAll(Name, Count,token);
+                _validation.ValidationAll(Name, Count, _cts.Token);
                 if (HasErrors == false)
                 {
                     string UnitLast = Count + " " + SelectedUnit;
@@ -67,13 +64,14 @@ namespace WareHouseTZ.ViewModal
                         Unit = UnitLast
                     };
 
-                    token.ThrowIfCancellationRequested();
-                    var response = await _dbService.AddProductDBAsync(product,token);
+                    _cts.Token.ThrowIfCancellationRequested();
+                    var response = await _dbService.AddProductDBAsync(product, _cts.Token);
                     if (response.Success == true) _displayService.ShowMessage(response.Message);
                 }
             }
             catch (OperationCanceledException) { }
         }
+
         public void EventInvoke(DataErrorsChangedEventArgs errors)
         {
             OnPropertyChanged(nameof(HasErrors));
@@ -81,20 +79,20 @@ namespace WareHouseTZ.ViewModal
         }
         partial void OnNameChanged(string value)
         {
-            Debounce(value,_cts.Token);
+            Debounce(value);
         }
         partial void OnCountChanged(string value)
         {
             _validation.ValidationCount(value);
         }
-        public async void Debounce(string value,CancellationToken token)
+        public async void Debounce(string value)
         {
             try
             {
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
                 await Task.Delay(1000, _cts.Token);
-                await _validation.ValidationName(value,token);
+                await _validation.ValidationName(value,_cts.Token);
             }
             catch(OperationCanceledException)
             {

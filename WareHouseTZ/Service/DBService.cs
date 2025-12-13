@@ -22,11 +22,13 @@ namespace WareHouseTZ.Service
             this.dbApplication = dbApplication;
         }
 
-        public async Task<DBResponse> AddProductDBAsync(Product product)
+        public async Task<DBResponse> AddProductDBAsync(Product product,CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
                 await dbApplication.Product.AddAsync(product);
+                token.ThrowIfCancellationRequested();
                 await dbApplication.SaveChangesAsync();
                 return new DBResponseMessage("Продукт добавлен", true);
             }

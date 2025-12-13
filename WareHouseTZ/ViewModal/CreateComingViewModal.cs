@@ -101,7 +101,7 @@ namespace WareHouseTZ.ViewModal
                 _display.ShowMessage(response.Message);
 
                 ChangeUnit(coming);
-                response = await _dBService.UpdateProductAsync(SelectedProduct);
+                //response = await _dBService.UpdateProductAsync(SelectedProduct);
             }
             catch (OperationCanceledException ex) { }
         }

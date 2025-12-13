@@ -6,9 +6,26 @@ namespace WareHouseTZ.View;
 
 public partial class EditProductView : ContentPage
 {
-	public EditProductView(IDBService dBService, IDisplayService display,Product product)
+	public EditProductView(EditProductViewModal vm)
 	{
 		InitializeComponent();
-        BindingContext = new EditProductViewModal(dBService, display,product);
+		BindingContext = vm;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is EditProductViewModal vm)
+        {
+            vm.LoadProductCommand.Execute(null);
+        }
+    }
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BindingContext is EditProductViewModal vm)
+        {
+            vm.CancelToken();
+        }
     }
 }
