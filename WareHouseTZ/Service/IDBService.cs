@@ -10,12 +10,12 @@ namespace WareHouseTZ.Service
     public interface IDBService
     {
         //Task<DBResponse> GetProductDBAsync(int product_id);
-        Task<DBResponse> AddProductDBAsync(Product product);
+        Task<DBResponse> AddProductDBAsync(Product product, CancellationToken token);
         Task<DBResponse> GetAllProductsDBAsync(CancellationToken _token);
         Task<DBResponse> DeleteProductAsync(int produc_id, CancellationToken token);
-        Task<DBResponse> UpdateProductAsync(Product product);
-        Task<DBResponse> CheckNameProductAsync(string Name);
-        Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName);
+        Task<DBResponse> UpdateProductAsync(Product product, CancellationToken token);
+        Task<DBResponse> CheckNameProductAsync(string Name, CancellationToken token);
+        Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName, CancellationToken token);
 
         //Coming
 

@@ -17,13 +17,14 @@ namespace WareHouseTZ.ViewModal
         private readonly IDBService _dbService;
         private readonly IDisplayService _displayService;
         private ProductValidation _validation;
-        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _cts;
         public CreateProductViewModal(IDBService dBService,IDisplayService display)
         {
             _dbService = dBService;
             _displayService = display;
             _validation = new ProductValidation(dBService);
             _validation.ErrorsChanged += (s,e) => EventInvoke(e);
+            _cts = new CancellationTokenSource();
         }
 
         public bool HasErrors => _validation.HasErrors;
@@ -46,23 +47,32 @@ namespace WareHouseTZ.ViewModal
         };
 
         [RelayCommand]
-        public async void CreateProduct()
+        public async Task CreateProduct()
         {
-            _validation.ValidationAll(Name,Count);
-            if(HasErrors == false)
+            await CreateAsync(_cts.Token);
+        }
+        private async Task CreateAsync(CancellationToken token)
+        {
+            try
             {
-                string UnitLast = Count + " " + SelectedUnit;
-                var product = new Product
+                _validation.ValidationAll(Name, Count,token);
+                if (HasErrors == false)
                 {
-                    Name = Name,
-                    Description = Description,
-                    Created_At = DateTime.Now,
-                    Unit = UnitLast
-                };
+                    string UnitLast = Count + " " + SelectedUnit;
+                    var product = new Product
+                    {
+                        Name = Name,
+                        Description = Description,
+                        Created_At = DateTime.Now,
+                        Unit = UnitLast
+                    };
 
-                var response = await _dbService.AddProductDBAsync(product);
-                if (response.Success == true) _displayService.ShowMessage(response.Message);
+                    token.ThrowIfCancellationRequested();
+                    var response = await _dbService.AddProductDBAsync(product,token);
+                    if (response.Success == true) _displayService.ShowMessage(response.Message);
+                }
             }
+            catch (OperationCanceledException) { }
         }
         public void EventInvoke(DataErrorsChangedEventArgs errors)
         {
@@ -71,25 +81,31 @@ namespace WareHouseTZ.ViewModal
         }
         partial void OnNameChanged(string value)
         {
-            Debounce(value);
+            Debounce(value,_cts.Token);
         }
         partial void OnCountChanged(string value)
         {
             _validation.ValidationCount(value);
         }
-        public async void Debounce(string value)
+        public async void Debounce(string value,CancellationToken token)
         {
             try
             {
-                _tokenSource.Cancel();
-                _tokenSource = new CancellationTokenSource();
-                await Task.Delay(1000, _tokenSource.Token);
-                _validation.ValidationName(value);
+                _cts.Cancel();
+                _cts = new CancellationTokenSource();
+                await Task.Delay(1000, _cts.Token);
+                await _validation.ValidationName(value,token);
             }
-            catch(TaskCanceledException ex)
+            catch(OperationCanceledException)
             {
 
             }
+        }
+        public void CancelToken()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
         }
 
     }

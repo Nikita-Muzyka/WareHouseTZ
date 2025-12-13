@@ -20,8 +20,8 @@ namespace WareHouseTZ.ViewModal
         private readonly IDisplayService _display;
         private CancellationTokenSource _cts;
 
-        public ObservableCollection<Product>? Products { get;set; }
-        public ObservableCollection<Product>? FilteredProducts { get;set; }
+        public ObservableCollection<Product> Products { get;set; }
+        public ObservableCollection<Product> FilteredProducts { get;set; }
 
         [ObservableProperty]
         public string searchText = string.Empty;
@@ -58,15 +58,13 @@ namespace WareHouseTZ.ViewModal
             {
                 token.ThrowIfCancellationRequested();
                 var response = await _dBService.GetAllProductsDBAsync(token);
-                var getallproducts = response as GetAllProductsResponse;
-                if (getallproducts != null)
-                {
-                    Products = getallproducts.Products;
-                }
+                var getallproducts = response as GetAllProductsResponse<Product>;
+              
+                    FilteredProducts = 
+                    new ObservableCollection<Product>(getallproducts.Products) ??
+                    new ObservableCollection<Product>();
+
                 token.ThrowIfCancellationRequested();
-                FilteredProducts = Products != null
-                 ? new ObservableCollection<Product>(Products)
-                 : new ObservableCollection<Product>();
                 OnPropertyChanged(nameof(FilteredProducts));
             }
             catch (OperationCanceledException) { }

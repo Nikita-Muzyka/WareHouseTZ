@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,11 +18,12 @@ namespace WareHouseTZ.ViewModal
     {
         private readonly IDBService _dBService;
         private readonly IDisplayService _display;
+        private CancellationTokenSource _cts;
         public CreateComingViewModal(IDBService dBService, IDisplayService display)
         {
             _dBService = dBService;
             _display = display;
-            LoadProducts();
+            _cts = new CancellationTokenSource();
         }
 
         [ObservableProperty]
@@ -46,47 +48,62 @@ namespace WareHouseTZ.ViewModal
 
         public decimal Total => (price ?? 0) * quantity;
 
-        private async void LoadProducts()
-        {
-            //var response = await _dBService.GetAllProductsDBAsync();
-            //var getall = response as GetAllProductsResponse;
-
-            //if (getall?.Products != null)
-            //{
-            //    foreach (var product in getall.Products)
-            //    {
-            //        Products.Add(product);
-            //    }
-            //}
-
-        }
-
         [RelayCommand]
-        private async void CreateComing()
+        public async Task LoadProducts()
         {
-            if (selectedProduct == null || quantity <= 0)
+            await LoadAsync(_cts.Token);
+        }
+        private async Task LoadAsync(CancellationToken token)
+        {
+            try
             {
-                _display.ShowMessage("Заполните обязательные поля");
-                return;
+                var response = await _dBService.GetAllProductsDBAsync(token);
+                var getall = response as GetAllProductsResponse<Product>;
+
+                if (getall?.Products != null)
+                {
+                    foreach (var product in getall.Products)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        Products.Add(product);
+                    }
+                }
             }
-
-            var coming = new Coming
+            catch (OperationCanceledException ex) { }
+        }
+        [RelayCommand]
+        private async Task CreateComing()
+        {
+            await Create(_cts.Token);
+        }
+        private async Task Create(CancellationToken token)
+        {
+            try
             {
-                Date = date,
-                Product_Id = selectedProduct.Id,
-                ProductName = selectedProduct.Name,
-                Quantity = quantity,
-                Price = price,
-                Supplier = supplier,
-                Document = document
-            };
+                if (selectedProduct == null || quantity <= 0)
+                {
+                    _display.ShowMessage("Заполните обязательные поля");
+                    return;
+                }
 
-            var response = await _dBService.AddComingDBAsync(coming);
-            _display.ShowMessage(response.Message);
+                var coming = new Coming
+                {
+                    Date = date,
+                    Product_Id = selectedProduct.Id,
+                    ProductName = selectedProduct.Name,
+                    Quantity = quantity,
+                    Price = price,
+                    Supplier = supplier,
+                    Document = document
+                };
 
-            ChangeUnit(coming);
-            response = await _dBService.UpdateProductAsync(SelectedProduct);
+                var response = await _dBService.AddComingDBAsync(coming);
+                _display.ShowMessage(response.Message);
 
+                ChangeUnit(coming);
+                response = await _dBService.UpdateProductAsync(SelectedProduct);
+            }
+            catch (OperationCanceledException ex) { }
         }
         void ChangeUnit(Coming coming)
         {
@@ -104,6 +121,12 @@ namespace WareHouseTZ.ViewModal
                 string newText = $"{result} {unit}"; 
                 SelectedProduct.Unit = newText;
             }
+        }
+        public void CancleToken()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
         }
     }
 

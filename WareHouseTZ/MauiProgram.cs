@@ -24,6 +24,10 @@ namespace WareHouseTZ
             builder.Services.AddScoped<DBApplication>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<MainPageViewModal>();
+            builder.Services.AddTransient<CreateProductView>();
+            builder.Services.AddTransient<CreateProductViewModal>();
+            builder.Services.AddTransient<CreateComingView>();
+            builder.Services.AddTransient<CreateComingViewModal>();
             builder.Services.AddScoped<IDBService,DBService>();
             builder.Services.AddScoped<IDisplayService,DisplayService>();
 

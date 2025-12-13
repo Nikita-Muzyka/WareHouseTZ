@@ -55,8 +55,7 @@ namespace WareHouseTZ.Service
                 token.ThrowIfCancellationRequested();
                 var products = await dbApplication.Product.ToListAsync();
                 token.ThrowIfCancellationRequested();
-                ObservableCollection<Product> productsCollection = new ObservableCollection<Product>(products);
-                if (products is not null) return new GetAllProductsResponse("Продукты найдены", true, productsCollection);
+                if (products is not null) return new GetAllProductsResponse<Product>("Продукты найдены", true, products);
                 else return new ErrorsResponse("Продуктов не найдено");
             }
             catch (OperationCanceledException) { throw; }
@@ -85,17 +84,20 @@ namespace WareHouseTZ.Service
                 return new ErrorsResponse("Ошибка при удалении продукта");
             }
         }
-        public async Task<DBResponse> UpdateProductAsync(Product product)
+        public async Task<DBResponse> UpdateProductAsync(Product product, CancellationToken token)
         {
             try
             {
                 var existingProduct = await dbApplication.Product.FindAsync(product.Id);
+                token.ThrowIfCancellationRequested();
                 if (existingProduct is null) return new ErrorsResponse("Продукт не найден");
                 existingProduct.Name = product.Name;
                 existingProduct.Description = product.Description;
                 existingProduct.Unit = product.Unit;
                 dbApplication.Product.Update(existingProduct);
+                token.ThrowIfCancellationRequested();
                 await dbApplication.SaveChangesAsync();
+                token.ThrowIfCancellationRequested();
                 return new DBResponseMessage("Продукт обновлен", true);
             }
             catch (Exception ex)
@@ -105,11 +107,12 @@ namespace WareHouseTZ.Service
         }
 
 
-        public async Task<DBResponse> CheckNameProductAsync(string Name)
+        public async Task<DBResponse> CheckNameProductAsync(string Name, CancellationToken token)
         {
             try
             {
                 var existingProduct = await dbApplication.Product.FirstOrDefaultAsync(c => c.Name == Name);
+                token.ThrowIfCancellationRequested();
                 if (existingProduct is null) return new DBResponseMessage("Имя свободно", true);
                 else return new ErrorsResponse("Имя продукта уже есть в базе");
             }
@@ -118,11 +121,12 @@ namespace WareHouseTZ.Service
                 return new ErrorsResponse("Ошибка при поиске продукта");
             }
         }
-        public async Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName)
+        public async Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName, CancellationToken token)
         {
             try
             {
                 var existingProduct = await dbApplication.Product.FirstOrDefaultAsync(c => c.Name == Name);
+                token.ThrowIfCancellationRequested();
                 if (existingProduct is null) return new DBResponseMessage("Имя свободно", true);
                 else if (existingProduct.Name == OldName) return new DBResponseMessage("Имена совпадают", true);
                 else return new ErrorsResponse("Имя продукта уже есть в базе");
