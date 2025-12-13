@@ -2,6 +2,8 @@
 using WareHouseTZ.Date;
 using WareHouseTZ.Service;
 using WareHouseTZ.Service.Display;
+using WareHouseTZ.View;
+using WareHouseTZ.ViewModal;
 
 namespace WareHouseTZ
 {
@@ -20,6 +22,8 @@ namespace WareHouseTZ
 
 
             builder.Services.AddScoped<DBApplication>();
+            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<MainPageViewModal>();
             builder.Services.AddScoped<IDBService,DBService>();
             builder.Services.AddScoped<IDisplayService,DisplayService>();
 

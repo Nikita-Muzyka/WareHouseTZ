@@ -11,8 +11,8 @@ namespace WareHouseTZ.Service
     {
         //Task<DBResponse> GetProductDBAsync(int product_id);
         Task<DBResponse> AddProductDBAsync(Product product);
-        Task<DBResponse> GetAllProductsDBAsync();
-        Task<DBResponse> DeleteProductAsync(int produc_id);
+        Task<DBResponse> GetAllProductsDBAsync(CancellationToken _token);
+        Task<DBResponse> DeleteProductAsync(int produc_id, CancellationToken token);
         Task<DBResponse> UpdateProductAsync(Product product);
         Task<DBResponse> CheckNameProductAsync(string Name);
         Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName);

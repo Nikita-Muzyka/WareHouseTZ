@@ -1,13 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WareHouseTZ.Date;
 using WareHouseTZ.Modal;
 using WareHouseTZ.Service;
-using System.Collections.ObjectModel;
 using WareHouseTZ.Service.Response;
 
 namespace WareHouseTZ.Service
@@ -31,7 +32,7 @@ namespace WareHouseTZ.Service
             }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при добавлении продукта");
+                return new ErrorsResponse("Ошибка при добавлении продукта");
             }
         }
         //public async Task<DBResponse> GetProductDBAsync(int product_id)
@@ -47,34 +48,41 @@ namespace WareHouseTZ.Service
         //        return new ErrorsResponse(ex.Message, "Ошибка при получении продукта");
         //    }
         //}
-        public async Task<DBResponse> GetAllProductsDBAsync()
+        public async Task<DBResponse> GetAllProductsDBAsync(CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
                 var products = await dbApplication.Product.ToListAsync();
+                token.ThrowIfCancellationRequested();
                 ObservableCollection<Product> productsCollection = new ObservableCollection<Product>(products);
                 if (products is not null) return new GetAllProductsResponse("Продукты найдены", true, productsCollection);
                 else return new ErrorsResponse("Продуктов не найдено");
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при получении продукта");
+                return new ErrorsResponse("Ошибка при получении продукта");
             }
         }
 
-        public async Task<DBResponse> DeleteProductAsync(int product_id)
+        public async Task<DBResponse> DeleteProductAsync(int product_id,CancellationToken token)
         {
             try
             {
                 var product = await dbApplication.Product.FindAsync(product_id);
+                token.ThrowIfCancellationRequested();
                 if (product is null) return new ErrorsResponse("Продукт не найден");
                 dbApplication.Product.Remove(product);
+                token.ThrowIfCancellationRequested();
                 await dbApplication.SaveChangesAsync();
+                token.ThrowIfCancellationRequested();
                 return new DBResponseMessage("Продукт удален", true);
             }
+            catch(OperationCanceledException) { throw; }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при удалении продукта");
+                return new ErrorsResponse("Ошибка при удалении продукта");
             }
         }
         public async Task<DBResponse> UpdateProductAsync(Product product)
@@ -92,7 +100,7 @@ namespace WareHouseTZ.Service
             }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при обновлении продукта");
+                return new ErrorsResponse("Ошибка при обновлении продукта");
             }
         }
 
@@ -107,7 +115,7 @@ namespace WareHouseTZ.Service
             }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при поиске продукта");
+                return new ErrorsResponse("Ошибка при поиске продукта");
             }
         }
         public async Task<DBResponse> EditCheckNameProductAsync(string Name,string OldName)
@@ -121,7 +129,7 @@ namespace WareHouseTZ.Service
             }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при поиске продукта");
+                return new ErrorsResponse("Ошибка при поиске продукта");
             }
         }
 
@@ -138,7 +146,7 @@ namespace WareHouseTZ.Service
             }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при добавлении прихода");
+                return new ErrorsResponse("Ошибка при добавлении прихода");
             }
         }
 
@@ -153,7 +161,7 @@ namespace WareHouseTZ.Service
             }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при получении продукта");
+                return new ErrorsResponse("Ошибка при получении продукта");
             }
         }
         public async Task<DBResponse> DeleteComingAsync(int coming_id)
@@ -168,7 +176,7 @@ namespace WareHouseTZ.Service
             }
             catch (Exception ex)
             {
-                return new ErrorsResponse(ex.Message, "Ошибка при удалении продукта");
+                return new ErrorsResponse("Ошибка при удалении продукта");
             }
         }
     }

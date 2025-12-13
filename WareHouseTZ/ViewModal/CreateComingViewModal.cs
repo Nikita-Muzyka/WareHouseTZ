@@ -48,16 +48,16 @@ namespace WareHouseTZ.ViewModal
 
         private async void LoadProducts()
         {
-            var response = await _dBService.GetAllProductsDBAsync();
-            var getall = response as GetAllProductsResponse;
+            //var response = await _dBService.GetAllProductsDBAsync();
+            //var getall = response as GetAllProductsResponse;
 
-            if (getall?.Products != null)
-            {
-                foreach (var product in getall.Products)
-                {
-                    Products.Add(product);
-                }
-            }
+            //if (getall?.Products != null)
+            //{
+            //    foreach (var product in getall.Products)
+            //    {
+            //        Products.Add(product);
+            //    }
+            //}
 
         }
 
