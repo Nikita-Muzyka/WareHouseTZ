@@ -18,8 +18,6 @@ namespace WareHouseTZ.ViewModal
 
         public ComingViewModel(IDBService dBService, IDisplayService display) : base(dBService, display)
         {
-            Comings = new ObservableCollection<Coming>();
-            FilteredComings = new ObservableCollection<Coming>();
             _cts = new CancellationTokenSource();
         }
         [ObservableProperty]
@@ -77,16 +75,16 @@ namespace WareHouseTZ.ViewModal
             if(response.Success == true)
             {
                 var getall = response as GetAllComingResponse;
-                Comings = getall.Comings;
-                FilteredComings = Comings;
+                Comings = getall.Comings != null ? new ObservableCollection<Coming>(getall.Comings) : new ObservableCollection<Coming>();
+                ApplyFilter();
             }
         }
 
-        [RelayCommand]
-        public async Task EditComing(Coming coming)
-        {
+        //[RelayCommand]
+        //public async Task EditComing(Coming coming)
+        //{
           
-        }
+        //}
 
         [RelayCommand]
         public async Task DeleteComing(Coming coming)
