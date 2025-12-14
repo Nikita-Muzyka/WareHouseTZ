@@ -6,9 +6,18 @@ namespace WareHouseTZ.View;
 
 public partial class CreateComingView : ContentPage
 {
-	public CreateComingView(IDBService dBService,IDisplayService display)
+	public CreateComingView(CreateComingViewModal vm)
 	{
 		InitializeComponent();
-		BindingContext = new CreateComingViewModal(dBService,display);
+		BindingContext = vm;
 	}
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+		if(BindingContext is CreateComingViewModal vm)
+		{
+			vm.LoadProductsCommand.Execute(null);
+		}
+    }
 }

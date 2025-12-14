@@ -14,17 +14,17 @@ using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class CreateComingViewModal : ObservableObject
+    public partial class CreateComingViewModal : BaseViewModel
     {
-        private readonly IDBService _dBService;
-        private readonly IDisplayService _display;
+
         private CancellationTokenSource _cts;
-        public CreateComingViewModal(IDBService dBService, IDisplayService display)
-        {
-            _dBService = dBService;
-            _display = display;
-            _cts = new CancellationTokenSource();
+        public CreateComingViewModal(IDBService dBService, IDisplayService display) :base(dBService,display)
+        { 
+           _cts = new CancellationTokenSource();
         }
+
+        public ObservableCollection<Product> Products { get; set; }
+
 
         [ObservableProperty]
         private DateTime date = DateTime.Now;
@@ -44,8 +44,6 @@ namespace WareHouseTZ.ViewModal
         [ObservableProperty]
         private string document;
 
-        public ObservableCollection<Product> Products { get; } = new();
-
         public decimal Total => (price ?? 0) * quantity;
 
         [RelayCommand]
@@ -59,17 +57,13 @@ namespace WareHouseTZ.ViewModal
             {
                 var response = await _dBService.GetAllProductsDBAsync(token);
                 var getall = response as GetAllProductsResponse<Product>;
-
-                if (getall?.Products != null)
-                {
-                    foreach (var product in getall.Products)
-                    {
-                        token.ThrowIfCancellationRequested();
-                        Products.Add(product);
-                    }
-                }
+  
+                    Products = getall.Products != null 
+                        ? new ObservableCollection<Product>(getall.Products) 
+                        : new ObservableCollection<Product>();
+                    OnPropertyChanged(nameof(Products));
             }
-            catch (OperationCanceledException ex) { }
+            catch (OperationCanceledException) { }
         }
         [RelayCommand]
         private async Task CreateComing()
@@ -97,13 +91,13 @@ namespace WareHouseTZ.ViewModal
                     Document = document
                 };
 
-                //var response = await _dBService.AddComingDBAsync(coming);
-                //_display.ShowMessage(response.Message);
-
+                var response = await _dBService.AddComingDBAsync(coming,token);
+                _display.ShowMessage(response.Message);
+                token.ThrowIfCancellationRequested();
                 ChangeUnit(coming);
-                //response = await _dBService.UpdateProductAsync(SelectedProduct);
+                response = await _dBService.UpdateProductAsync(SelectedProduct, token);
             }
-            catch (OperationCanceledException ex) { }
+            catch (OperationCanceledException) { }
         }
         void ChangeUnit(Coming coming)
         {
