@@ -19,8 +19,8 @@ namespace WareHouseTZ.Service
 
         //Coming
 
-        Task<DBResponse> AddComingDBAsync(Coming coming);
-        Task<DBResponse> GetAllComingDBAsync();
-        Task<DBResponse> DeleteComingAsync(int coming_id);
+        Task<DBResponse> AddComingDBAsync(Coming coming, CancellationToken token);
+        Task<DBResponse> GetAllComingDBAsync(CancellationToken token);
+        Task<DBResponse> DeleteComingAsync(int coming_id, CancellationToken token);
     }
 }

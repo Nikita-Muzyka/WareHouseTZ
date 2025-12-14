@@ -32,6 +32,7 @@ namespace WareHouseTZ.Service
                 await dbApplication.SaveChangesAsync();
                 return new DBResponseMessage("Продукт добавлен", true);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return new ErrorsResponse("Ошибка при добавлении продукта");
@@ -102,6 +103,7 @@ namespace WareHouseTZ.Service
                 token.ThrowIfCancellationRequested();
                 return new DBResponseMessage("Продукт обновлен", true);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return new ErrorsResponse("Ошибка при обновлении продукта");
@@ -113,11 +115,12 @@ namespace WareHouseTZ.Service
         {
             try
             {
-                var existingProduct = await dbApplication.Product.FirstOrDefaultAsync(c => c.Name == Name);
+                var existingProduct = await dbApplication.Product.AnyAsync(c => c.Name == Name);
                 token.ThrowIfCancellationRequested();
-                if (existingProduct is null) return new DBResponseMessage("Имя свободно", true);
+                if (existingProduct is false) return new DBResponseMessage("Имя свободно", true);
                 else return new ErrorsResponse("Имя продукта уже есть в базе");
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return new ErrorsResponse("Ошибка при поиске продукта");
@@ -133,6 +136,7 @@ namespace WareHouseTZ.Service
                 else if (existingProduct.Name == OldName) return new DBResponseMessage("Имена совпадают", true);
                 else return new ErrorsResponse("Имя продукта уже есть в базе");
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return new ErrorsResponse("Ошибка при поиске продукта");
@@ -142,44 +146,51 @@ namespace WareHouseTZ.Service
 
         //Coming
 
-        public async Task<DBResponse> AddComingDBAsync(Coming coming)
+        public async Task<DBResponse> AddComingDBAsync(Coming coming, CancellationToken token)
         {
             try
             {
                 await dbApplication.Coming.AddAsync(coming);
+                token.ThrowIfCancellationRequested();
                 await dbApplication.SaveChangesAsync();
                 return new DBResponseMessage("Продукт добавлен", true);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return new ErrorsResponse("Ошибка при добавлении прихода");
             }
         }
 
-        public async Task<DBResponse> GetAllComingDBAsync()
+        public async Task<DBResponse> GetAllComingDBAsync(CancellationToken token)
         {
             try
             {
                 var comings = await dbApplication.Coming.ToListAsync();
+                token.ThrowIfCancellationRequested();
                 ObservableCollection<Coming> comingsCollection = new ObservableCollection<Coming>(comings);
                 if (comings is not null) return new GetAllComingResponse("Приходы найдены", true, comingsCollection);
                 else return new ErrorsResponse("Продуктов не найдено");
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return new ErrorsResponse("Ошибка при получении продукта");
             }
         }
-        public async Task<DBResponse> DeleteComingAsync(int coming_id)
+        public async Task<DBResponse> DeleteComingAsync(int coming_id, CancellationToken token)
         {
             try
             {
                 var coming = await dbApplication.Coming.FindAsync(coming_id);
+                token.ThrowIfCancellationRequested();
                 if (coming is null) return new ErrorsResponse("Приход не найден");
                 dbApplication.Coming.Remove(coming);
+                token.ThrowIfCancellationRequested();
                 await dbApplication.SaveChangesAsync();
                 return new DBResponseMessage("Coming удален", true);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return new ErrorsResponse("Ошибка при удалении продукта");

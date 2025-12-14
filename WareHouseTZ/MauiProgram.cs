@@ -22,13 +22,14 @@ namespace WareHouseTZ
 
 
             builder.Services.AddScoped<DBApplication>();
-            builder.Services.AddScoped<BaseViewModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<MainPageViewModal>();
             builder.Services.AddTransient<CreateProductView>();
             builder.Services.AddTransient<CreateProductViewModal>();
             builder.Services.AddTransient<EditProductView>();
             builder.Services.AddTransient<EditProductViewModal>();
+            builder.Services.AddTransient<ComingView>();
+            builder.Services.AddTransient<ComingViewModel>();
             builder.Services.AddTransient<CreateComingView>();
             builder.Services.AddTransient<CreateComingViewModal>();
             builder.Services.AddScoped<IDBService,DBService>();

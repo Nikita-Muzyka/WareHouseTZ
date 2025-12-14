@@ -21,4 +21,12 @@ public partial class ComingView : ContentPage
 			comingVM.LoadComingsCommand.Execute(comingVM);
 		}
     }
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BindingContext is ComingViewModel comingVM)
+        {
+            comingVM.CancelToken();
+        }
+    }
 }

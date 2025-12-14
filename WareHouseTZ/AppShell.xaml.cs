@@ -9,6 +9,7 @@ namespace WareHouseTZ
             InitializeComponent();
             Routing.RegisterRoute(nameof(CreateProductView),typeof(CreateProductView));
             Routing.RegisterRoute(nameof(EditProductView), typeof(EditProductView));
+            Routing.RegisterRoute(nameof(CreateComingView), typeof(CreateComingView));
         }
     }
 }

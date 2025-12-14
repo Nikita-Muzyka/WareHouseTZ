@@ -97,8 +97,8 @@ namespace WareHouseTZ.ViewModal
                     Document = document
                 };
 
-                var response = await _dBService.AddComingDBAsync(coming);
-                _display.ShowMessage(response.Message);
+                //var response = await _dBService.AddComingDBAsync(coming);
+                //_display.ShowMessage(response.Message);
 
                 ChangeUnit(coming);
                 //response = await _dBService.UpdateProductAsync(SelectedProduct);
