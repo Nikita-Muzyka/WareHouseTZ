@@ -14,21 +14,18 @@ using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class MainPageViewModal : ObservableObject
+    public partial class MainPageViewModal : BaseViewModel
     {
-        private readonly IDBService _dBService;
-        private readonly IDisplayService _display;
+        private CancellationTokenSource _cts;
 
         public ObservableCollection<Product> Products { get;set; }
         public ObservableCollection<Product> FilteredProducts { get;set; }
 
         [ObservableProperty]
         public string searchText = string.Empty;
-        public MainPageViewModal(IDBService dBService,IDisplayService display)
-        {
-            _dBService = dBService;
-            _display = display;
-            LoadProducts();
+        public MainPageViewModal(IDBService dBService, IDisplayService display) : base(dBService, display)
+        { 
+            _cts = new CancellationTokenSource();
         }
 
         partial void OnSearchTextChanged(string value)
@@ -47,38 +44,69 @@ namespace WareHouseTZ.ViewModal
             }
         }
         [RelayCommand]
-        public async void LoadProducts()
+        public async Task LoadProducts()
         {
-            var response = await _dBService.GetAllProductsDBAsync();
-            var getallproducts = response as GetAllProductsResponse;
-            if (getallproducts != null)
+            await LoadAsync(_cts.Token);
+        }
+        public async Task LoadAsync(CancellationToken token)
+        {
+            try
             {
-                Products = getallproducts.Products;
+                token.ThrowIfCancellationRequested();
+                var response = await _dBService.GetAllProductsDBAsync(token);
+                if(response.Success == true)
+                {
+                    var getallproducts = response as GetAllProductsResponse<Product>;
+
+                    FilteredProducts =
+                    new ObservableCollection<Product>(getallproducts.Products) ??
+                    new ObservableCollection<Product>();
+
+                    token.ThrowIfCancellationRequested();
+                    OnPropertyChanged(nameof(FilteredProducts));
+                }
+                else
+                {
+                    _display.ShowMessage(response.Message);
+                }
             }
-
-
-            FilteredProducts = Products != null
-             ? new ObservableCollection<Product>(Products)
-             : new ObservableCollection<Product>();
-            OnPropertyChanged(nameof(FilteredProducts));
+            catch (OperationCanceledException) { }
+            catch (Exception ex) { }
         }
 
         [RelayCommand]
-        public async void EditProduct(Product product)
+        public async Task EditProduct(Product ProductParm)
         {
-            await Shell.Current.Navigation.PushAsync(new EditProductView(_dBService, _display,product));
+            await Shell.Current.GoToAsync(nameof(EditProductView), new Dictionary<string, object> { ["ProductParm"] = ProductParm });
         }
         [RelayCommand]
-        public async void DeleteProduct(Product product)
+        public async Task DeleteProduct(Product product)
         {
-            var response = await _dBService.DeleteProductAsync(product.Id);
-            _display.ShowMessage(response.Message);
-            if (response.Success == true) LoadProducts();
+            await DeleteAsync(product, _cts.Token);
+        }
+        public async Task DeleteAsync(Product product, CancellationToken token)
+        {
+            try
+            {
+                var response = await _dBService.DeleteProductAsync(product.Id, token);
+                _display.ShowMessage(response.Message);
+                if (response.Success == true) await LoadProducts();
+            }
+            catch (OperationCanceledException ex) { }
+            {
+
+            }
         }
         [RelayCommand]
-        public async void AddProduct()
+        public async Task AddProduct()
         {
-            await Shell.Current.Navigation.PushAsync(new CreateProductView(_dBService,_display));
+            await Shell.Current.GoToAsync(nameof(CreateProductView));
+        }
+        public void CancleToken()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
         }
     }
 }

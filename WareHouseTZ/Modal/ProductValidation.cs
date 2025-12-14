@@ -27,24 +27,25 @@ namespace WareHouseTZ.Modal
         {
             _dbService = dBService;
         }
-        public void ValidationAll(string Name,string Count)
+        public async void ValidationAll(string Name,string Count,CancellationToken token)
         {
-            ValidationName(Name);
             ValidationCount(Count);
+            await ValidationName(Name,token);
         }
-        public void EditValidationAll(string Name, string Count,string OldName)
+        public async void EditValidationAll(string Name, string Count,string OldName, CancellationToken token)
         {
-            EditValidationName(Name,OldName);
             ValidationCount(Count);
+            await EditValidationName(Name, OldName, token);
         }
-        public async void EditValidationName(string Name,string OldName)
+        public async Task EditValidationName(string Name,string OldName, CancellationToken token)
         {
             ErrorsClear(propertyNameError);
             if (string.IsNullOrWhiteSpace(Name) == false)
             {
                 if (Name.Length < 50)
                 {
-                    var response = await _dbService.EditCheckNameProductAsync(Name,OldName);
+                    var response = await _dbService.EditCheckNameProductAsync(Name,OldName,token);
+                    token.ThrowIfCancellationRequested();
                     if (response.Success == true)
                     {
                         OnErrorsChanged(propertyNameError);
@@ -55,23 +56,29 @@ namespace WareHouseTZ.Modal
             }
             else ErrorsAdd(propertyNameError, "Поле обязательно к заполнению");
         }
-        public async void ValidationName(string Name)
+        public async Task ValidationName(string Name,CancellationToken token)
         {
-            ErrorsClear(propertyNameError);
-            if (string.IsNullOrWhiteSpace(Name) == false)
+            try
             {
-                if (Name.Length < 50)
+                ErrorsClear(propertyNameError);
+                token.ThrowIfCancellationRequested();
+                if (string.IsNullOrWhiteSpace(Name) == false)
                 {
-                   var response = await _dbService.CheckNameProductAsync(Name);
-                    if (response.Success == true)
+                    if (Name.Length < 50)
                     {
-                        OnErrorsChanged(propertyNameError);
+                        var response = await _dbService.CheckNameProductAsync(Name,token);
+                        token.ThrowIfCancellationRequested();
+                        if (response.Success == true)
+                        {
+                            OnErrorsChanged(propertyNameError);
+                        }
+                        else ErrorsAdd(propertyNameError, response.Message);
                     }
-                    else ErrorsAdd(propertyNameError, response.Message);
+                    else ErrorsAdd(propertyNameError, "Name должен сожержать не больше 50  знаков");
                 }
-                else ErrorsAdd(propertyNameError, "Name должен сожержать не больше 50  знаков");
+                else ErrorsAdd(propertyNameError, "Поле обязательно к заполнению");
             }
-            else ErrorsAdd(propertyNameError, "Поле обязательно к заполнению");
+            catch (OperationCanceledException) { }
         }
         public void ValidationCount(string Count)
         {
@@ -80,7 +87,9 @@ namespace WareHouseTZ.Modal
             {
                 if (Count.Any(char.IsNumber) == true && Count.Any(char.IsLetter) == false)
                 {
-                    OnErrorsChanged(propertyCountError);
+                    int CountNum = int.Parse(Count);
+                    if (CountNum < 1000000 && CountNum > 0) OnErrorsChanged(propertyCountError);
+                    else ErrorsAdd(propertyCountError, "Кол-во должно быть больше 0 и меньше 1.000.000");
                 }
                 else ErrorsAdd(propertyCountError, "Поле должен сожержать только цифры");
             }

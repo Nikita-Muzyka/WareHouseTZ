@@ -177,7 +177,7 @@
                                                    VerticalOptions="Center">
 
                                 <!-- Кнопка Изменить -->
-                                <Button Text="✏️" 
+                                <!--<Button Text="✏️" 
                                         FontSize="14"
                                         BackgroundColor="#4CAF50"
                                         TextColor="White"
@@ -186,7 +186,7 @@
                                         CornerRadius="8"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                          Path=BindingContext.EditComingCommand}"
-                                        CommandParameter="{Binding .}"/>
+                                        CommandParameter="{Binding .}"/>-->
 
                                 <!-- Кнопка Удалить -->
                                 <Button Text="🗑️" 

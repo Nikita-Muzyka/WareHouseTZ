@@ -6,9 +6,18 @@ namespace WareHouseTZ.View;
 
 public partial class CreateProductView : ContentPage
 {
-	public CreateProductView(IDBService dBService,IDisplayService display)
+	public CreateProductView(CreateProductViewModal vm)
 	{
 		InitializeComponent();
-		BindingContext = new CreateProductViewModal(dBService,display);
+		BindingContext = vm;
 	}
+    
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+		if(BindingContext is CreateProductViewModal vm)
+		{
+			vm.CancelToken();
+		}
+    }
 }

@@ -6,12 +6,10 @@ namespace WareHouseTZ.View
 {
     public partial class MainPage : ContentPage
     {
-        MainPageViewModal mainVM;
-        public MainPage(IDBService dBService,IDisplayService display)
+        public MainPage(MainPageViewModal vm)
         {
             InitializeComponent();
-            mainVM = new MainPageViewModal(dBService,display);
-            BindingContext = mainVM;
+            BindingContext = vm;
         }
 
         protected override void OnAppearing()
@@ -22,6 +20,14 @@ namespace WareHouseTZ.View
             if (BindingContext is MainPageViewModal viewModel)
             {
                 viewModel.LoadProductsCommand.Execute(null);
+            }
+        }
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            if (BindingContext is MainPageViewModal viewModel)
+            {
+                viewModel.CancleToken();
             }
         }
     }

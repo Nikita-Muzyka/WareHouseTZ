@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,18 +13,15 @@ using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class CreateProductViewModal : ObservableObject
+    public partial class CreateProductViewModal : BaseViewModel
     {
-        private readonly IDBService _dbService;
-        private readonly IDisplayService _displayService;
         private ProductValidation _validation;
-        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-        public CreateProductViewModal(IDBService dBService,IDisplayService display)
-        {
-            _dbService = dBService;
-            _displayService = display;
+        private CancellationTokenSource _cts;
+        public CreateProductViewModal(IDBService dBService, IDisplayService display) : base(dBService, display)
+        {   
             _validation = new ProductValidation(dBService);
             _validation.ErrorsChanged += (s,e) => EventInvoke(e);
+            _cts = new CancellationTokenSource();
         }
 
         public bool HasErrors => _validation.HasErrors;
@@ -46,24 +44,30 @@ namespace WareHouseTZ.ViewModal
         };
 
         [RelayCommand]
-        public async void CreateProduct()
+        public async Task CreateProduct()
         {
-            _validation.ValidationAll(Name,Count);
-            if(HasErrors == false)
+            try
             {
-                string UnitLast = Count + " " + SelectedUnit;
-                var product = new Product
+                _validation.ValidationAll(Name, Count, _cts.Token);
+                if (HasErrors == false)
                 {
-                    Name = Name,
-                    Description = Description,
-                    Created_At = DateTime.Now,
-                    Unit = UnitLast
-                };
+                    string UnitLast = Count + " " + SelectedUnit;
+                    var product = new Product
+                    {
+                        Name = Name,
+                        Description = Description,
+                        Created_At = DateTime.Now,
+                        Unit = UnitLast
+                    };
 
-                var response = await _dbService.AddProductDBAsync(product);
-                if (response.Success == true) _displayService.ShowMessage(response.Message);
+                    _cts.Token.ThrowIfCancellationRequested();
+                    var response = await _dBService.AddProductDBAsync(product, _cts.Token);
+                    if (response.Success == true) _display.ShowMessage(response.Message);
+                }
             }
+            catch (OperationCanceledException) { }
         }
+
         public void EventInvoke(DataErrorsChangedEventArgs errors)
         {
             OnPropertyChanged(nameof(HasErrors));
@@ -81,15 +85,21 @@ namespace WareHouseTZ.ViewModal
         {
             try
             {
-                _tokenSource.Cancel();
-                _tokenSource = new CancellationTokenSource();
-                await Task.Delay(1000, _tokenSource.Token);
-                _validation.ValidationName(value);
+                _cts.Cancel();
+                _cts = new CancellationTokenSource();
+                await Task.Delay(1000, _cts.Token);
+                await _validation.ValidationName(value,_cts.Token);
             }
-            catch(TaskCanceledException ex)
+            catch(OperationCanceledException)
             {
 
             }
+        }
+        public void CancelToken()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
         }
 
     }

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,16 +14,17 @@ using WareHouseTZ.Service.Display;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class CreateComingViewModal : ObservableObject
+    public partial class CreateComingViewModal : BaseViewModel
     {
-        private readonly IDBService _dBService;
-        private readonly IDisplayService _display;
-        public CreateComingViewModal(IDBService dBService, IDisplayService display)
-        {
-            _dBService = dBService;
-            _display = display;
-            LoadProducts();
+
+        private CancellationTokenSource _cts;
+        public CreateComingViewModal(IDBService dBService, IDisplayService display) :base(dBService,display)
+        { 
+           _cts = new CancellationTokenSource();
         }
+
+        public ObservableCollection<Product> Products { get; set; }
+
 
         [ObservableProperty]
         private DateTime date = DateTime.Now;
@@ -42,51 +44,60 @@ namespace WareHouseTZ.ViewModal
         [ObservableProperty]
         private string document;
 
-        public ObservableCollection<Product> Products { get; } = new();
-
         public decimal Total => (price ?? 0) * quantity;
 
-        private async void LoadProducts()
-        {
-            var response = await _dBService.GetAllProductsDBAsync();
-            var getall = response as GetAllProductsResponse;
-
-            if (getall?.Products != null)
-            {
-                foreach (var product in getall.Products)
-                {
-                    Products.Add(product);
-                }
-            }
-
-        }
-
         [RelayCommand]
-        private async void CreateComing()
+        public async Task LoadProducts()
         {
-            if (selectedProduct == null || quantity <= 0)
+            await LoadAsync(_cts.Token);
+        }
+        private async Task LoadAsync(CancellationToken token)
+        {
+            try
             {
-                _display.ShowMessage("Заполните обязательные поля");
-                return;
+                var response = await _dBService.GetAllProductsDBAsync(token);
+                var getall = response as GetAllProductsResponse<Product>;
+  
+                    Products = getall.Products != null 
+                        ? new ObservableCollection<Product>(getall.Products) 
+                        : new ObservableCollection<Product>();
+                    OnPropertyChanged(nameof(Products));
             }
-
-            var coming = new Coming
+            catch (OperationCanceledException) { }
+        }
+        [RelayCommand]
+        private async Task CreateComing()
+        {
+            await Create(_cts.Token);
+        }
+        private async Task Create(CancellationToken token)
+        {
+            try
             {
-                Date = date,
-                Product_Id = selectedProduct.Id,
-                ProductName = selectedProduct.Name,
-                Quantity = quantity,
-                Price = price,
-                Supplier = supplier,
-                Document = document
-            };
+                if (selectedProduct == null || quantity <= 0)
+                {
+                    _display.ShowMessage("Заполните обязательные поля");
+                    return;
+                }
 
-            var response = await _dBService.AddComingDBAsync(coming);
-            _display.ShowMessage(response.Message);
+                var coming = new Coming
+                {
+                    Date = date,
+                    Product_Id = selectedProduct.Id,
+                    ProductName = selectedProduct.Name,
+                    Quantity = quantity,
+                    Price = price,
+                    Supplier = supplier,
+                    Document = document
+                };
 
-            ChangeUnit(coming);
-            response = await _dBService.UpdateProductAsync(SelectedProduct);
-
+                var response = await _dBService.AddComingDBAsync(coming,token);
+                _display.ShowMessage(response.Message);
+                token.ThrowIfCancellationRequested();
+                ChangeUnit(coming);
+                response = await _dBService.UpdateProductAsync(SelectedProduct, token);
+            }
+            catch (OperationCanceledException) { }
         }
         void ChangeUnit(Coming coming)
         {
@@ -104,6 +115,12 @@ namespace WareHouseTZ.ViewModal
                 string newText = $"{result} {unit}"; 
                 SelectedProduct.Unit = newText;
             }
+        }
+        public void CancleToken()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
         }
     }
 

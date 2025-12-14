@@ -22,13 +22,14 @@
             <Border Stroke="#E0E0E0"
         StrokeThickness="1"
         StrokeShape="RoundRectangle 8"
-        Padding="15">
+        Padding="10">
                 <VerticalStackLayout Spacing="5">
-                    <Label Text="Товар *" FontSize="14" TextColor="Gray"/>
+                    <Label Text="Товар *" FontSize="12" TextColor="Gray"/>
                     <Picker Title="Выберите товар"
                 ItemsSource="{Binding Products}"
                 SelectedItem="{Binding SelectedProduct}"
-                ItemDisplayBinding="{Binding Name}"/>
+                ItemDisplayBinding="{Binding Name}"
+                            HeightRequest="60"/>
                 </VerticalStackLayout>
             </Border>
 

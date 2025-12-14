@@ -9,14 +9,17 @@ using WareHouseTZ.View;
 
 namespace WareHouseTZ.ViewModal
 {
-    public partial class ComingViewModel : ObservableObject
+    public partial class ComingViewModel : BaseViewModel
     {
-        private readonly IDBService _dBService;
-        private readonly IDisplayService _display;
-
+      
         public ObservableCollection<Coming> Comings { get; set; }
         public ObservableCollection<Coming> FilteredComings { get; set; }
+        private CancellationTokenSource _cts;
 
+        public ComingViewModel(IDBService dBService, IDisplayService display) : base(dBService, display)
+        {
+            _cts = new CancellationTokenSource();
+        }
         [ObservableProperty]
         private string searchText = string.Empty;
 
@@ -25,17 +28,6 @@ namespace WareHouseTZ.ViewModal
 
         [ObservableProperty]
         private DateTime selectedDateTo = DateTime.Now;
-
-        public ComingViewModel(IDBService dBService, IDisplayService display)
-        {
-            _dBService = dBService;
-            _display = display;
-
-            Comings = new ObservableCollection<Coming>();
-            FilteredComings = new ObservableCollection<Coming>();
-
-            LoadComings();
-        }
 
         partial void OnSearchTextChanged(string value)
         {
@@ -77,36 +69,42 @@ namespace WareHouseTZ.ViewModal
         }
 
         [RelayCommand]
-        public async void LoadComings()
+        public async Task LoadComings()
         {
-           var response = await _dBService.GetAllComingDBAsync();
+           var response = await _dBService.GetAllComingDBAsync(_cts.Token);
             if(response.Success == true)
             {
                 var getall = response as GetAllComingResponse;
-                Comings = getall.Comings;
-                FilteredComings = Comings;
+                Comings = getall.Comings != null ? new ObservableCollection<Coming>(getall.Comings) : new ObservableCollection<Coming>();
+                ApplyFilter();
             }
         }
 
-        [RelayCommand]
-        public async void EditComing(Coming coming)
-        {
+        //[RelayCommand]
+        //public async Task EditComing(Coming coming)
+        //{
           
-        }
+        //}
 
         [RelayCommand]
-        public async void DeleteComing(Coming coming)
+        public async Task DeleteComing(Coming coming)
         {
-           var response = await _dBService.DeleteComingAsync(coming.Id);
+           var response = await _dBService.DeleteComingAsync(coming.Id,_cts.Token);
             _display.ShowMessage(response.Message);
-            LoadComings();
+            await LoadComings();
         }
 
         [RelayCommand]
-        public async void AddComing()
+        public async Task AddComing()
         {
-            await Shell.Current.Navigation.PushAsync(new CreateComingView(_dBService, _display));
+            await Shell.Current.GoToAsync(nameof(CreateComingView));
         }
-       
+
+        public void CancelToken()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
+        }
     }
 }

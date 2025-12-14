@@ -6,12 +6,11 @@ namespace WareHouseTZ.View;
 
 public partial class ComingView : ContentPage
 {
-	ComingViewModel comingVM;
-	public ComingView(IDBService dBService,IDisplayService display)
+	public ComingView(ComingViewModel vm)
 	{
 		InitializeComponent();
-		comingVM = new ComingViewModel(dBService,display);
-		BindingContext = comingVM;
+
+		BindingContext = vm;
 	}
 
     protected override void OnAppearing()
@@ -21,5 +20,13 @@ public partial class ComingView : ContentPage
 		{
 			comingVM.LoadComingsCommand.Execute(comingVM);
 		}
+    }
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BindingContext is ComingViewModel comingVM)
+        {
+            comingVM.CancelToken();
+        }
     }
 }
