@@ -54,14 +54,21 @@ namespace WareHouseTZ.ViewModal
             {
                 token.ThrowIfCancellationRequested();
                 var response = await _dBService.GetAllProductsDBAsync(token);
-                var getallproducts = response as GetAllProductsResponse<Product>;
-              
-                    FilteredProducts = 
+                if(response.Success == true)
+                {
+                    var getallproducts = response as GetAllProductsResponse<Product>;
+
+                    FilteredProducts =
                     new ObservableCollection<Product>(getallproducts.Products) ??
                     new ObservableCollection<Product>();
 
-                token.ThrowIfCancellationRequested();
-                OnPropertyChanged(nameof(FilteredProducts));
+                    token.ThrowIfCancellationRequested();
+                    OnPropertyChanged(nameof(FilteredProducts));
+                }
+                else
+                {
+                    _display.ShowMessage(response.Message);
+                }
             }
             catch (OperationCanceledException) { }
             catch (Exception ex) { }

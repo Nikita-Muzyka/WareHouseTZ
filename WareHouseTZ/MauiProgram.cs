@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using WareHouseTZ.Date;
 using WareHouseTZ.Service;
 using WareHouseTZ.Service.Display;
@@ -21,7 +23,6 @@ namespace WareHouseTZ
                 });
 
 
-            builder.Services.AddScoped<DBApplication>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<MainPageViewModal>();
             builder.Services.AddTransient<CreateProductView>();
@@ -32,9 +33,11 @@ namespace WareHouseTZ
             builder.Services.AddTransient<ComingViewModel>();
             builder.Services.AddTransient<CreateComingView>();
             builder.Services.AddTransient<CreateComingViewModal>();
-            builder.Services.AddScoped<IDBService,DBService>();
-            builder.Services.AddScoped<IDisplayService,DisplayService>();
+            builder.Services.AddScoped<IDBService, DBService>();
+            builder.Services.AddScoped<IDisplayService, DisplayService>();
 
+            var connection = "Server=MYZUKA\\SQLEXPRESS;Database=WareHouseTZ;Trusted_Connection=true;TrustServerCertificate=true;";
+            builder.Services.AddDbContext<DBApplication>(option => option.UseSqlServer(connection));
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
